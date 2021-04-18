@@ -1,8 +1,8 @@
 package com.alg.algamoney.api.resource;
 
 import com.alg.algamoney.api.event.RecursoCriadoEvent;
-import com.alg.algamoney.api.model.Categoria;
-import com.alg.algamoney.api.repository.CategoriaRepository;
+import com.alg.algamoney.api.model.Pessoa;
+import com.alg.algamoney.api.repository.PessoaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -16,11 +16,11 @@ import java.net.URI;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/categoria")
-public class CategoriaResource {
+@RequestMapping("/pessoa")
+public class PessoaResource {
 
     @Autowired
-    private CategoriaRepository repository;
+    private PessoaRepository repository;
 
     @Autowired
     private ApplicationEventPublisher publisher;
@@ -31,18 +31,18 @@ public class CategoriaResource {
     }
 
     @PostMapping
-    public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
-        categoria = this.repository.save(categoria);
-        this.publisher.publishEvent(new RecursoCriadoEvent(this, response, categoria.getCodigo()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoria);
+    public ResponseEntity<Pessoa> criar(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
+        pessoa = this.repository.save(pessoa);
+        this.publisher.publishEvent(new RecursoCriadoEvent(this, response, pessoa.getCodigo()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(pessoa);
     }
 
     @GetMapping("/{codigo}")
-    public ResponseEntity<Categoria> buscarPelaCodigo(@PathVariable Long codigo) {
+    public ResponseEntity<Pessoa> buscarPelaCodigo(@PathVariable Long codigo) {
 
-        Optional<Categoria> categoria = this.repository.findById(codigo);
-        if(categoria.isPresent()) {
-            return ResponseEntity.ok(categoria.get());
+        Optional<Pessoa> pessoa = this.repository.findById(codigo);
+        if(pessoa.isPresent()) {
+            return ResponseEntity.ok(pessoa.get());
         }
         return ResponseEntity.notFound().build();
     }
