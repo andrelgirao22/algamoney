@@ -1,10 +1,12 @@
 package com.alg.algamoney.api.exceptionhandler;
 
+import com.alg.algamoney.api.exceptions.PessoaNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -39,6 +42,22 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
         List<Erro> lista = this.criarListaErros(ex.getBindingResult());
 
         return  handleExceptionInternal(ex,lista, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler({EmptyResultDataAccessException.class})
+    public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request) {
+        String mensagemDesenvolvedor = ex.toString();
+        String mensagem = messageSource.getMessage("recurso.nao-encontrado", null, LocaleContextHolder.getLocale());
+        List<Erro> lista = Arrays.asList(new Erro(mensagem, mensagemDesenvolvedor));
+        return  handleExceptionInternal(ex,lista, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler({PessoaNotFoundException.class})
+    public ResponseEntity<Object> handlePessoaException(PessoaNotFoundException ex, WebRequest request) {
+        String mensagemDesenvolvedor = ex.toString();
+        String mensagem = messageSource.getMessage("pessoa.nao-encontrado", null, LocaleContextHolder.getLocale());
+        List<Erro> lista = Arrays.asList(new Erro(mensagem, mensagemDesenvolvedor));
+        return  handleExceptionInternal(ex,lista, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
     private List<Erro> criarListaErros(BindingResult bindingResult) {
