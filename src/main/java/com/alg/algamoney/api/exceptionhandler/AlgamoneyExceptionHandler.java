@@ -1,11 +1,15 @@
 package com.alg.algamoney.api.exceptionhandler;
 
+import com.alg.algamoney.api.exceptions.LancamentoNotFoundException;
+import com.alg.algamoney.api.exceptions.PessoaInexistenteOuInativaException;
 import com.alg.algamoney.api.exceptions.PessoaNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,12 +56,28 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
         return  handleExceptionInternal(ex,lista, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
+    @ExceptionHandler({DataIntegrityViolationException.class})
+    public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
+        String mensagemDesenvolvedor = ExceptionUtils.getRootCauseMessage(ex);
+        String mensagem = messageSource.getMessage("recurso.operacao-nao-permitida", null, LocaleContextHolder.getLocale());
+        List<Erro> lista = Arrays.asList(new Erro(mensagem, mensagemDesenvolvedor));
+        return  handleExceptionInternal(ex,lista, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
     @ExceptionHandler({PessoaNotFoundException.class})
     public ResponseEntity<Object> handlePessoaException(PessoaNotFoundException ex, WebRequest request) {
         String mensagemDesenvolvedor = ex.toString();
         String mensagem = messageSource.getMessage("pessoa.nao-encontrado", null, LocaleContextHolder.getLocale());
         List<Erro> lista = Arrays.asList(new Erro(mensagem, mensagemDesenvolvedor));
         return  handleExceptionInternal(ex,lista, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler({LancamentoNotFoundException.class})
+    public ResponseEntity<Object> handleLancamentoNotFound(LancamentoNotFoundException ex, WebRequest request) {
+        String mensagemDesenvolvedor = ex.toString();
+        String mensagem = messageSource.getMessage("lancamento.nao-encontrado", null, LocaleContextHolder.getLocale());
+        List<Erro> lista = Arrays.asList(new Erro(mensagem, mensagemDesenvolvedor));
+        return handleExceptionInternal(ex, lista, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
     private List<Erro> criarListaErros(BindingResult bindingResult) {
