@@ -8,6 +8,8 @@ import com.alg.algamoney.api.repository.LancamentoRepository;
 import com.alg.algamoney.api.repository.PessoaRepository;
 import com.alg.algamoney.api.repository.filter.LancamentoFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,8 +24,8 @@ public class LancamentoService {
     @Autowired
     private PessoaRepository pessoaRepository;
 
-    public List<Lancamento> pesquisar(LancamentoFilter filter) {
-        return this.repository.filtrar(filter);
+    public Page<Lancamento> pesquisar(LancamentoFilter filter, Pageable pageable) {
+        return this.repository.filtrar(filter, pageable);
     }
 
     public Lancamento salvar(Lancamento lancamento) {
